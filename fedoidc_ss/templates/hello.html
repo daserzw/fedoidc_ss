@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The OIDCFed Signing Service</title>
+</head>
+<body>
+{% include 'header.html' %}
+This is the proof of concept Signing Service for the OIDCFed Pilot.
+<p>Here you can:</p>
+<ul>
+    <li><a href="{{ url_for('sigserv.fo_key') }}">Check federation public key</a></li>
+    <li><a href="{{ url_for('sigserv.enrol') }}">Enrol a new entity into the federation</a></li>
+    <li><a href="{{ url_for('sigserv.list_entities') }}">List/delete enrolled entities</a></li>
+    <li><a href="{{ url_for('sigserv.addsup') }}">Add a hierarchical superior entity</a></li>
+    <li><a href="{{ url_for('sigserv.list_superiors') }}">List superior entities</a></li>
+</ul>
+</body>
+</html>

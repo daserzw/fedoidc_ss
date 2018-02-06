@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enrol entity into Federation</title>
+</head>
+<body>
+{% include 'header.html' %}
+<h1>Enrol a new entity</h1>
+<form method="post">
+    <label>Entity identifier (issuer)</label><br/>
+    <input name="issuer"/><br/>
+    <label>Signing key (public part)</label><br/>
+    <textarea name="signing_key"></textarea><br/>
+    <button type="submit">Register</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of enroled entities in the Federation</title>
+    <style>
+    table {
+        border-collapse: collapse;
+    }
+
+    table, td, th {
+        border: 1px solid black;
+    }
+    </style>
+</head>
+<body>
+{% include 'header.html' %}
+<h1>List of enrolled entities</h1>
+There are {{ entities | length }} entities<br/>
+<table>
+    <tr>
+        <th>URL (Identifier)</th>
+        <th>Actions</th>
+    </tr>
+{% for entity in entities %}
+    <tr>
+        <td>{{ entity.issuer }}</td>
+        <td>
+            <a href="{{ url_for('sigserv.getsk', issuer_urlsafe=entity.issuer|quote_plus) }}">View public Signing Key</a><br>
+            <a href="{{ url_for('sigserv.getms', issuer_urlsafe=entity.issuer|quote_plus)}}">Get all SMS</a><br>
+            {% for fed, fed_urlsafe in federations %}
+                <a href="{{ url_for('sigserv.getms_by_fo', issuer_urlsafe=entity.issuer|quote_plus, fo_urlsafe=fed_urlsafe) }}">Get SMS for {{ fed }}</a><br>
+            {%  endfor %}
+            <a  onclick="return confirm('Are you sure?')" href="{{ url_for('sigserv.delete_entity', issuer_urlsafe=entity.issuer|quote_plus)}}">Delete</a><br>
+        </td>
+    </tr>
+{% endfor %}
+</table>
+</body>
+</html>

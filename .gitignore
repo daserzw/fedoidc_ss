@@ -1,0 +1,29 @@
+# emacs
+*~
+\#*\#
+
+# vi
+*.swp
+
+# Compiled python modules
+*.pyc
+
+# Actual flup settings
+FLUP_SETTINGS.cfg
+
+# Tests artifacts
+.cache
+__pycache__
+
+# Python egg
+*.egg-info
+
+# SQLite
+*.db
+
+# CONFIG
+config.py
+
+# PyCharm
+.idea
+
