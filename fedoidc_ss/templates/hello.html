@@ -7,13 +7,32 @@
 <body>
 {% include 'header.html' %}
 This is the proof of concept Signing Service for the OIDCFed Pilot.
-<p>Here you can:</p>
+<p>Federation</p>
 <ul>
     <li><a href="{{ url_for('sigserv.fo_key') }}">Check federation public key</a></li>
-    <li><a href="{{ url_for('sigserv.enrol') }}">Enrol a new entity into the federation</a></li>
-    <li><a href="{{ url_for('sigserv.list_entities') }}">List/delete enrolled entities</a></li>
     <li><a href="{{ url_for('sigserv.addsup') }}">Add a hierarchical superior entity</a></li>
     <li><a href="{{ url_for('sigserv.list_superiors') }}">List superior entities</a></li>
+</ul>
+<p>Entities</p>
+<ul>
+    <li><a href="{{ url_for('sigserv.enrol') }}">Enrol a new entity into the federation</a></li>
+    <li><a href="{{ url_for('sigserv.list_entities') }}">List/delete enrolled entities</a></li>
+</ul>
+<p>APIs</p>
+<ul>
+    <li>
+        <pre>/getms/&lt;issuer_urlsafe&gt;</pre>
+        <p>Returns the metadata statements for the requested issuer.</p>
+    </li>
+    <li>
+        <pre>/getms/&lt;issuer_urlsafe&gt;/&lt;fo_urlsafe&gt;</pre>
+        <p>Returns the metadata statements for the requested issuer, but
+        this time signed by the requested federation operator.</p>
+    </li>
+    <li>
+        <pre>/getsk/&lt;issuer_urlsafe&gt;</pre>
+        <p>Returns the signing keys for the requested issuer.</p>
+    </li>
 </ul>
 </body>
 </html>

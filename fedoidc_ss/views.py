@@ -1,28 +1,24 @@
 import json
-import sqlite3
-import sys
-import urllib.request
-from urllib.parse import quote_plus, unquote_plus
 
 import fedoidc
-from fedoidc.operator import Operator
+from urllib.parse import quote_plus, unquote_plus
 from flask import Blueprint, jsonify, render_template, redirect, url_for, current_app
 from flask import request
 from oic.utils.keyio import KeyJar
 from werkzeug.exceptions import NotAcceptable
 from fedoidc_ss.models import Entity, Superior
-
 from fedoidc_ss.database import db_session
+from fedoidc_ss import sms_services
 
 sigserv = Blueprint('sigserv', __name__, url_prefix='')
-app = current_app
+
 
 @sigserv.route('/')
 def main():
     """
     Main entrypoint. Just lists options
     """
-    return render_template('hello.html', fo_name=app.config['FO_NAME'])
+    return render_template('hello.html', fo_name=current_app.config['FO_NAME'])
 
 
 @sigserv.route('/fo_key')
@@ -31,7 +27,7 @@ def fo_key():
     Entrypoint that provides public FO key (for information)
     :return: public FO key
     """
-    kj = fedoidc.read_jwks_file(app.config['SIG_KEY'])
+    kj = fedoidc.read_jwks_file(current_app.config['SIG_KEY'])
     return jsonify(kj.export_jwks())
 
 
@@ -73,8 +69,8 @@ def list_entities():
         print(entity.issuer, entity.signing_keys)
 
     return render_template("list.html", entities=entities,
-                           federations=[(app.config['FO_NAME'],
-                                         quote_plus(app.config['FO_NAME']))])
+                           federations=[(current_app.config['FO_NAME'],
+                                         quote_plus(current_app.config['FO_NAME']))])
 
 
 @sigserv.route('/delete/<issuer_urlsafe>')
@@ -89,65 +85,19 @@ def delete_entity(issuer_urlsafe):
     return redirect(url_for('sigserv.list_entities'))
 
 
-def _get_sup_sms():
-    """
-    Fetches superior SMS corresponding to this MSS / FO. If two superiors provide SMS for the
-    same FO, it just takes the last one.
-    """
-    result = {}
-    superiors = Superior.query.all()
-    for superior in superiors:
-        result.update(json.loads(urllib.request.urlopen(superior.uri).read()))
-    return result
-
-
-def _get_entity_sig_key(issuer_urlsafe):
-    """
-    Returns the entity's signing key
-    """
-    issuer = unquote_plus(issuer_urlsafe)
-    entity = Entity.query.filter(Entity.issuer == issuer).first()
-    if not entity:
-        raise NotAcceptable("Could not find entity {}".format(issuer))
-    return entity.signing_keys
-
-
-def _generate_sms(issuer_urlsafe):
-    """
-    Generates SMS for the indicated entity
-    """
-    sign_keys = _get_entity_sig_key(issuer_urlsafe)
-    superior_sms = _get_sup_sms()
-    # Add ourselves as a superior without SMS
-    superior_sms[app.config['FO_NAME']] = None
-    result = {}
-
-    # iterate superior's SMS and generate a new SMS for each one of them
-    for superior, sms in superior_sms.items():
-        req = {'signing_keys': json.loads(sign_keys)}
-        if sms:
-            req['metadata_statements'] = {superior: sms}
-        _req = fedoidc.MetadataStatement(**req)
-        kj = fedoidc.read_jwks_file(app.config['SIG_KEY'])
-        op = Operator(keyjar=kj, iss=app.config['FO_NAME'], lifetime=app.config['LIFETIME'])
-        result[superior] = op.pack_metadata_statement(_req)
-
-    return result
-
-
 @sigserv.route('/getms/<issuer_urlsafe>')
 def getms(issuer_urlsafe):
     """
     Returns SMS for the indicated entity
     """
-    return jsonify(_generate_sms(issuer_urlsafe))
+    return jsonify(sms_services.generate_sms(issuer_urlsafe))
 
 
 @sigserv.route('/getms/<issuer_urlsafe>/<fo_urlsafe>')
 def getms_by_fo(issuer_urlsafe, fo_urlsafe):
     """ Returns SMS for the indicated entity and FO
     """
-    result = _generate_sms(issuer_urlsafe)
+    result = sms_services.generate_sms(issuer_urlsafe)
     if unquote_plus(fo_urlsafe) in result:
         return result[unquote_plus(fo_urlsafe)]
     raise NotAcceptable("There is no SMS for that entity and FO")
@@ -156,7 +106,7 @@ def getms_by_fo(issuer_urlsafe, fo_urlsafe):
 @sigserv.route('/getsk/<issuer_urlsafe>')
 def getsk(issuer_urlsafe):
     """ Returns entity's signing key"""
-    sig_key = _get_entity_sig_key(issuer_urlsafe)
+    sig_key = sms_services.get_entity_sig_key(issuer_urlsafe)
     return jsonify(json.loads(sig_key))
 
 
