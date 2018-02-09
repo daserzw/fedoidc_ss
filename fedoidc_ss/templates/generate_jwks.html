@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create JWKS</title>
+</head>
+<body>
+{% include 'header.html' %}
+<h1>Create JWKS</h1>
+<p>This tool will let you generate a JWKS containing two keypairs:</p>
+<ul>
+    <li>an RSA keypair based on RS-256 with a 2048 bits size.</li>
+    <li>an EC keypair based on P-256.</li>
+</ul>
+<form method="POST">
+        <button type="submit">Generate</button>
+</form>
+{%  if jwks %}
+<h2>Public + Private keys JWKS</h2>
+<textarea cols="80" rows="24">{{  jwks }}</textarea>
+<h2>Public keys JWKS</h2>
+<textarea cols="80" rows="12">{{  pub_jwks }}</textarea>
+{%  endif %}
+</body>
+</html>

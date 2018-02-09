@@ -27,7 +27,7 @@ def fo_key():
     Entrypoint that provides public FO key (for information)
     :return: public FO key
     """
-    kj = fedoidc.read_jwks_file(current_app.config['SIG_KEY'])
+    kj = fedoidc.read_jwks_file(current_app.config['FO_SIG_KEYS'])
     return jsonify(kj.export_jwks())
 
 
@@ -149,3 +149,11 @@ def delete_sup(issuer_urlsafe):
     db_session.delete(superior)
     db_session.commit()
     return redirect(url_for('sigserv.list_superiors'))
+
+@sigserv.route('/generate_jwks', methods=['GET', 'POST'])
+def generate_jwks():
+    jwks = None
+    pub_jwks = None
+    if request.method == 'POST':
+        (jwks, pub_jwks) = sms_services.create_jwks(pub=True)
+    return render_template('generate_jwks.html', jwks=jwks, pub_jwks=pub_jwks)

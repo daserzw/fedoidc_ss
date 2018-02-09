@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The OIDCFed Signing Service</title>
+    <title>An OIDCFed Signing Service</title>
 </head>
 <body>
 {% include 'header.html' %}
-This is the proof of concept Signing Service for the OIDCFed Pilot.
+This is a proof of concept metadata_statements signing service mainly targeted to
+Federation Operator, but it can also be used by any intermediate entities between
+the federation and the Relying Parties or OpenID Providers.
 <p>Federation</p>
 <ul>
     <li><a href="{{ url_for('sigserv.fo_key') }}">Check federation public key</a></li>
@@ -18,16 +20,20 @@ This is the proof of concept Signing Service for the OIDCFed Pilot.
     <li><a href="{{ url_for('sigserv.enrol') }}">Enrol a new entity into the federation</a></li>
     <li><a href="{{ url_for('sigserv.list_entities') }}">List/delete enrolled entities</a></li>
 </ul>
+<p>Tools</p>
+<ul>
+    <li><a href="{{  url_for('sigserv.generate_jwks') }}">Generate JWKS</a></li>
+</ul>
 <p>APIs</p>
 <ul>
     <li>
         <pre>/getms/&lt;issuer_urlsafe&gt;</pre>
-        <p>Returns the metadata statements for the requested issuer.</p>
+        <p>Returns all the metadata statements for the requested issuer.</p>
     </li>
     <li>
         <pre>/getms/&lt;issuer_urlsafe&gt;/&lt;fo_urlsafe&gt;</pre>
         <p>Returns the metadata statements for the requested issuer, but
-        this time signed by the requested federation operator.</p>
+        this time only those signed by the requested federation operator.</p>
     </li>
     <li>
         <pre>/getsk/&lt;issuer_urlsafe&gt;</pre>

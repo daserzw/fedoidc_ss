@@ -1,11 +1,12 @@
 import json
 import urllib
 import fedoidc
-from urllib.parse import quote_plus, unquote_plus
+from urllib.parse import unquote_plus
 from fedoidc.operator import Operator
 from flask import current_app
 from werkzeug.exceptions import NotAcceptable
 from fedoidc_ss.models import Entity, Superior
+from oic.utils.keyio import build_keyjar
 
 
 def _get_sup_sms():
@@ -18,6 +19,36 @@ def _get_sup_sms():
     for superior in superiors:
         result.update(json.loads(urllib.request.urlopen(superior.uri).read()))
     return result
+
+
+def create_jwks(pub=False):
+    """
+    Create a JWKS with keys defined in KEYDEFS
+    :param: set `pub` to True to make it return also a JWKS with only the public part of the keys
+    :return: a JWKS
+    :return: a tuple with the full JWKS, and a JWKS with only the public part of the keys
+    """
+
+    jwks = None
+
+    _jwks, _keyjar, _ = build_keyjar(
+        current_app.config['KEYDEFS']
+    )
+
+    jwks = json.dumps(_keyjar.export_jwks(private=True),
+                      sort_keys=True,
+                      indent=2
+                      )
+
+    if pub:
+        pub_jwks = json.dumps(_keyjar.export_jwks(),
+                              sort_keys = True,
+                              indent = 2
+                              )
+
+        return (jwks, pub_jwks)
+
+    return jwks
 
 
 def get_entity_sig_key(issuer_urlsafe):
@@ -47,8 +78,8 @@ def generate_sms(issuer_urlsafe):
         if sms:
             req['metadata_statements'] = {superior: sms}
         _req = fedoidc.MetadataStatement(**req)
-        kj = fedoidc.read_jwks_file(current_app.config['SIG_KEY'])
-        op = Operator(keyjar=kj, iss=current_app.config['FO_NAME'], lifetime=current_app.config['LIFETIME'])
+        kj = fedoidc.read_jwks_file(current_app.config['FO_SIG_KEYS'])
+        op = Operator(keyjar=kj, iss=current_app.config['FO_NAME'], lifetime=current_app.config['FO_SIG_LIFETIME'])
         result[superior] = op.pack_metadata_statement(_req)
 
     return result

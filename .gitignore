@@ -1,26 +1,20 @@
-# emacs
+# emacs swap and backup files
 *~
 \#*\#
 
-# vi
+# vi swap files
 *.swp
 
 # Compiled python modules
 *.pyc
 
-# Actual flup settings
-FLUP_SETTINGS.cfg
-
 # Tests artifacts
 .cache
 __pycache__
 
-# Python egg
-*.egg-info
-
-# SQLite
-*.db
-
 # PyCharm
 .idea
+
+# Virtualenv
+venv
 
